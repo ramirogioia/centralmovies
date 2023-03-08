@@ -1,24 +1,31 @@
-CREATE TABLE IF NOT EXISTS movies (
-  movie_id VARCHAR(255) NOT NULL,
+CREATE TABLE movies (
+  movie_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  imdb_id VARCHAR(255) NOT NULL,
   name VARCHAR(255) NOT NULL,
   actors VARCHAR(255),
   year INT,
   ranking INT,
-  image VARCHAR(255),
-  PRIMARY KEY (movie_id)
+  image VARCHAR(255)
 );
 
-CREATE TABLE IF NOT EXISTS platforms (
+CREATE TABLE platforms (
   platform_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   is_online BOOLEAN NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS movies_platforms (
-  movie_id VARCHAR(255) NOT NULL,
+CREATE TABLE movies_platforms (
+  movie_id INT NOT NULL,
   platform_id INT NOT NULL,
   registered_date TIMESTAMP NOT NULL,
   PRIMARY KEY (movie_id, platform_id),
   FOREIGN KEY (movie_id) REFERENCES movies(movie_id),
   FOREIGN KEY (platform_id) REFERENCES platforms(platform_id)
+);
+
+CREATE TABLE search_cache (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  query VARCHAR(255),
+  movie_id INT NULL,
+  FOREIGN KEY (movie_id) REFERENCES movies(movie_id)
 );

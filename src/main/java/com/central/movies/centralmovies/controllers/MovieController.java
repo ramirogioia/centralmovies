@@ -21,14 +21,13 @@ public class MovieController {
   private MovieService movieService;
 
   @GetMapping("/movies/{id}")
-  public ResponseEntity<ResponseEntity<List<MovieDTO>>> getMovie(@PathVariable String id) throws IOException, InterruptedException {
-    ResponseEntity<List<MovieDTO>> movie = movieService.getMovieById(id);
+  public ResponseEntity<MovieDTO> getMovie(@PathVariable String id) throws IOException, InterruptedException {
+    ResponseEntity<MovieDTO> response = movieService.getMovieById(id);
 
-    if (movie != null) {
-      return ResponseEntity.ok(movie);
+    if (response != null) {
+        return response;
     } else {
       return ResponseEntity.notFound().build();
     }
   }
-
 }
