@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import com.central.movies.centralmovies.dto.SearchCacheEntity;
 import com.central.movies.centralmovies.external.ImdbMoviesClient;
 import com.central.movies.centralmovies.repositories.MovieRepository;
 import com.central.movies.centralmovies.repositories.SearchCacheRepository;
+import com.central.movies.centralmovies.scraping.WebDriverManager;
 
 @Service
 public class MovieService {
@@ -29,7 +31,9 @@ public class MovieService {
     @Autowired
     SearchCacheRepository cacheRepository;
 
-    public ResponseEntity<MovieDTO> getMovieById(String searchText) throws IOException, InterruptedException {
+    WebDriverManager driverManager;
+
+    public ResponseEntity<MovieDTO> getMovieByMovieText(String searchText) throws IOException, InterruptedException {
 
         MovieDTO cachedMovie = validateAndGetFromCache(searchText);
 
@@ -49,12 +53,22 @@ public class MovieService {
             movieRepository.save(bestMatch);
             cacheRepository
                     .save(SearchCacheEntity.builder().query(searchText).movie_id(bestMatch.getMovieId()).build());
-            }
+            }   
 
             return ResponseEntity.ok(existingMovie);
         } else {
             return ResponseEntity.status(response.getStatusCode()).body(null);
         }
+    }
+
+    public ResponseEntity<MovieDTO> getPlatformsByMovieText(String searchText) throws IOException, InterruptedException {
+            driverManager.initializeDriver();
+            List<String> availablePlatforms = driverManager.getListOfPlatforms(searchText);
+
+            availablePlatforms = availablePlatforms.stream().map(s -> s.toUpperCase().replaceAll(" ", "_"))
+            .collect(Collectors.toList());
+
+            return null;
     }
 
     private MovieDTO getBestMatchFromResultListBasedOnRanking(List<MovieDTO> list) {

@@ -20,9 +20,20 @@ public class MovieController {
   @Autowired
   private MovieService movieService;
 
-  @GetMapping("/movies/{id}")
-  public ResponseEntity<MovieDTO> getMovie(@PathVariable String id) throws IOException, InterruptedException {
-    ResponseEntity<MovieDTO> response = movieService.getMovieById(id);
+  @GetMapping("/movies/info/{query}")
+  public ResponseEntity<MovieDTO> getMovie(@PathVariable String query) throws IOException, InterruptedException {
+    ResponseEntity<MovieDTO> response = movieService.getMovieByMovieText(query);
+
+    if (response != null) {
+        return response;
+    } else {
+      return ResponseEntity.notFound().build();
+    }
+  }
+
+  @GetMapping("/movies/platforms/{query}")
+  public ResponseEntity<MovieDTO> get(@PathVariable String query) throws IOException, InterruptedException {
+    ResponseEntity<MovieDTO> response = movieService.getPlatformsByMovieText(query);
 
     if (response != null) {
         return response;
