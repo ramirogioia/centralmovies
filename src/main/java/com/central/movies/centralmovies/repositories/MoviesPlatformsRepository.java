@@ -1,4 +1,4 @@
-package com.central.movies.centralmovies.repositories;
+/*package com.central.movies.centralmovies.repositories;
 
 import com.central.movies.centralmovies.dto.MoviePlatformEntity;
 
@@ -10,4 +10,4 @@ public interface MoviesPlatformsRepository extends JpaRepository<MoviePlatformEn
 
     MoviePlatformEntity findAllByMovieIds(Long movieId);
 
-}
+}*/

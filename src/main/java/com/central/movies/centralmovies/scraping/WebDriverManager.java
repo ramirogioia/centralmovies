@@ -1,4 +1,4 @@
-package com.central.movies.centralmovies.utils.scraping;
+package com.central.movies.centralmovies.scraping;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;

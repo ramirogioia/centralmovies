@@ -1,6 +1,8 @@
 package com.central.movies.centralmovies.services;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +43,7 @@ public class MovieService {
             return ResponseEntity.ok(cachedMovie);
         }
 
-        ResponseEntity<MoviesListDTO> response = imdbClient.getImdbMovie(searchText);
+        ResponseEntity<MoviesListDTO> response = imdbClient.getImdbMovie(formatSearchText(searchText));
         if (response.getStatusCode() == HttpStatus.OK) {
             MovieDTO bestMatch = this.getBestMatchFromResultListBasedOnRanking(response.getBody().getMovies());
             MovieDTO existingMovie = validateMovieAlreadyExisting(bestMatch.getImdbId());
@@ -49,13 +51,14 @@ public class MovieService {
             if (existingMovie != null) {
                 cacheRepository
                     .save(SearchCacheEntity.builder().query(searchText).movie_id(existingMovie.getMovieId()).build());
+                    return ResponseEntity.ok(existingMovie);
             }else{
             movieRepository.save(bestMatch);
             cacheRepository
                     .save(SearchCacheEntity.builder().query(searchText).movie_id(bestMatch.getMovieId()).build());
+                    return ResponseEntity.ok(bestMatch);
             }   
-
-            return ResponseEntity.ok(existingMovie);
+            
         } else {
             return ResponseEntity.status(response.getStatusCode()).body(null);
         }
@@ -112,5 +115,9 @@ public class MovieService {
             return null;
         }
 
+    }
+
+    private String formatSearchText(String searchText) {
+        return searchText.replace(" ", "%20");
     }
 }

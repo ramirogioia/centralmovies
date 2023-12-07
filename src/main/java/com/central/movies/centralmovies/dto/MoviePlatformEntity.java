@@ -1,11 +1,12 @@
-package com.central.movies.centralmovies.dto;
+/*package com.central.movies.centralmovies.dto;
 
 import java.security.Timestamp;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,3 +33,4 @@ public class MoviePlatformEntity {
     private Timestamp registeredDate;
     
 }
+*/
