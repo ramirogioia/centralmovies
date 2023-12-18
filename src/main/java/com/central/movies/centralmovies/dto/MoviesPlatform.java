@@ -1,8 +1,10 @@
-/*package com.central.movies.centralmovies.dto;
+package com.central.movies.centralmovies.dto;
 
+import java.io.Serializable;
 import java.security.Timestamp;
 
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -18,19 +20,20 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-@Entity(name = "MoviesPlatforms")
-public class MoviePlatformEntity {
+@Entity(name = "movies_platforms")
+public class MoviesPlatform implements Serializable {
+
+    @EmbeddedId
+    private MoviesPlatformId id;
 
     @ManyToOne
-    @JoinColumn(name = "movie_id")
-    private Long movie;
+    @JoinColumn(name = "movie_id", insertable = false, updatable = false)
+    private MovieDTO movie;
 
     @ManyToOne
-    @JoinColumn(name = "platform_id")
-    private Long platform;
+    @JoinColumn(name = "platform_id", insertable = false, updatable = false)
+    private Platforms platform;
 
     @Column(name = "registered_date")
     private Timestamp registeredDate;
-    
 }
-*/

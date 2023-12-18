@@ -2,9 +2,8 @@ package com.central.movies.centralmovies.dto;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,19 +15,19 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-@Entity(name = "search_cache")
-public class SearchCacheEntity {
+@Entity(name = "platforms")
+public class Platforms {
 
     @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long platform;
 
     @Column
-    private String query;
+    private String name;
 
     @Column
-    @Builder.Default()
-    private Long movie_id = null;
+    private String description;
+
+    @Column
+    private boolean isOnline;
     
 }

@@ -27,7 +27,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-@Entity(name = "Movies")
+@Entity(name = "movies")
 public class MovieDTO {
 
   @Id
@@ -35,7 +35,7 @@ public class MovieDTO {
   @Column(name = "movie_id")
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @JsonIgnore
-  private Long movieId;
+  Long movieId;
 
   @JsonProperty("imdb_id")
   @Column(name = "imdb_id")

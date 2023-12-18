@@ -1,13 +1,16 @@
-/*package com.central.movies.centralmovies.repositories;
+package com.central.movies.centralmovies.repositories;
 
-import com.central.movies.centralmovies.dto.MoviePlatformEntity;
+import com.central.movies.centralmovies.dto.MoviesPlatform;
+import com.central.movies.centralmovies.dto.MoviesPlatformId;
+
+import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface MoviesPlatformsRepository extends JpaRepository<MoviePlatformEntity, Long> {
+public interface MoviesPlatformsRepository extends JpaRepository<MoviesPlatform, MoviesPlatformId> {
 
-    MoviePlatformEntity findByMovieId(Long movieId);
+    Optional<MoviesPlatform> findById(MoviesPlatformId id);
 
-    MoviePlatformEntity findAllByMovieIds(Long movieId);
-
-}*/
+    List<MoviesPlatform> findAllById(MoviesPlatformId id);
+}

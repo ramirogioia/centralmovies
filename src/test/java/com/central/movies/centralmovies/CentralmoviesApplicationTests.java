@@ -5,7 +5,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 class CentralmoviesApplicationTests {
-
+	//NOT USED
+	
 	@Test
 	void contextLoads() {
 	}
