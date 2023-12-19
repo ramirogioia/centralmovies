@@ -1,6 +1,7 @@
 package com.central.movies.centralmovies.controllers;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.central.movies.centralmovies.dto.MovieDTO;
+import com.central.movies.centralmovies.dto.MoviesPlatforms;
 import com.central.movies.centralmovies.services.MovieService;
 
 @RestController
@@ -32,13 +34,18 @@ public ResponseEntity<MovieDTO> getMovie(@RequestParam(name = "movie") String qu
 }
 
   @GetMapping("/movies/platforms/{query}")
-  public ResponseEntity<MovieDTO> get(@PathVariable String query) throws IOException, InterruptedException {
-    ResponseEntity<MovieDTO> response = movieService.getPlatformsByMovieText(query);
+  public ResponseEntity<List<MoviesPlatforms>> getMoviePlatforms(@PathVariable String query) throws IOException, InterruptedException {
+    ResponseEntity<List<MoviesPlatforms>> response = movieService.getPlatformsByMovieText(query);
 
     if (response != null) {
         return response;
     } else {
       return ResponseEntity.notFound().build();
     }
+  }
+
+  @GetMapping("/movies/platforms")
+  public ResponseEntity<List<String>> get(@RequestParam(name = "movie") String query) throws IOException, InterruptedException {
+    return movieService.getListOfPlatforms(query);
   }
 }
