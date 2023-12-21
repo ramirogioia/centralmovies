@@ -7,10 +7,16 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface MoviesPlatformsRepository extends JpaRepository<MoviesPlatforms, MoviesPlatformId> {
 
-    Optional<MoviesPlatforms> findById(Long movie_id);
+    @Query("SELECT mp FROM movies_platforms mp WHERE mp.id.movie = :movieId")
+    List<MoviesPlatforms> findAllByMovieId(@Param("movieId") Long movieId);
 
-    List<MoviesPlatforms> findAllById(Long movie_id);
+    Optional<MoviesPlatforms> findByIdMovieAndIdPlatform(Long movieId, Long platformId);
+
+    @Query("SELECT mp FROM movies_platforms mp WHERE mp.id.platform = :platformId")
+    List<MoviesPlatforms> findAllByPlatformId(@Param("platformId") Long platformId);
 }

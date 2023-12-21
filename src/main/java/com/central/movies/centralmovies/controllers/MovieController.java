@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.central.movies.centralmovies.dto.MovieDTO;
 import com.central.movies.centralmovies.dto.MoviesPlatforms;
+import com.central.movies.centralmovies.dto.Platforms;
 import com.central.movies.centralmovies.services.MovieService;
 
 @RestController
@@ -22,30 +23,25 @@ public class MovieController {
   @Autowired
   private MovieService movieService;
 
-@GetMapping("/movies/info")
-public ResponseEntity<MovieDTO> getMovie(@RequestParam(name = "movie") String query) throws IOException, InterruptedException {
+  @GetMapping("/movies/info")
+  public ResponseEntity<MovieDTO> getMovie(@RequestParam(name = "movie") String query)
+      throws IOException, InterruptedException {
     ResponseEntity<MovieDTO> response = movieService.getMovieByMovieText(query);
 
     if (response != null) {
-        return response;
-    } else {
-        return ResponseEntity.notFound().build();
-    }
-}
-
-  @GetMapping("/movies/platforms/{query}")
-  public ResponseEntity<List<MoviesPlatforms>> getMoviePlatforms(@PathVariable String query) throws IOException, InterruptedException {
-    ResponseEntity<List<MoviesPlatforms>> response = movieService.getPlatformsByMovieText(query);
-
-    if (response != null) {
-        return response;
+      return response;
     } else {
       return ResponseEntity.notFound().build();
     }
   }
 
   @GetMapping("/movies/platforms")
-  public ResponseEntity<List<String>> get(@RequestParam(name = "movie") String query) throws IOException, InterruptedException {
-    return movieService.getListOfPlatforms(query);
+  public ResponseEntity<List<Platforms>> get(@RequestParam(name = "movie") String query)
+      throws IOException, InterruptedException {
+    try {
+      return movieService.getPlatformsByMovieText(query);
+    } catch (org.openqa.selenium.NoSuchElementException e) {
+      return ResponseEntity.notFound().build();
+    }
   }
 }

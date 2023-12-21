@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS flywar_schema_history;
 DROP TABLE IF EXISTS platforms;
 DROP TABLE IF EXISTS search_cache;
 DROP TABLE IF EXISTS movies_platforms;

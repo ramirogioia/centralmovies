@@ -24,8 +24,6 @@ public class WebDriverManagerHead {
 
     private WebDriver driver;
     private Waiter waiter;
-    
-    private static final String GOOGLE_URL = "www.google.com";
     private GooglePage googlePage;
     
     public WebDriver getDriver() {
@@ -48,27 +46,25 @@ public class WebDriverManagerHead {
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
-            waiter = new Waiter(driver);
-            googlePage = new GooglePage(driver, waiter);
         }else{
             ChromeOptions options = new ChromeOptions();
+            System.setProperty("webdriver.chrome.driver",  System.getProperty("user.dir") + "/src/main/resources/chromedriver.exe");
             ChromeDriverService service = new ChromeDriverService.Builder().build();
-            //options.addArguments("--headless");
-            System.setProperty("webdriver.chrome.driver", "src/main/resources/chromedriver.exe");
+            options.addArguments("--headless");
             driver = new ChromeDriver(service, options);
         }
+        waiter = new Waiter(driver);
+        googlePage = new GooglePage(driver, waiter);
     }
 
-    public List<String> getListOfPlatforms(String query, Boolean keepActive) {
-        driver.get(GOOGLE_URL);
+    public String getPlatformsInformationFromScrapping(String query, Boolean keepActive) throws org.openqa.selenium.NoSuchElementException{
+        googlePage.enterSite();
+        String scrappedPlatforms = googlePage.getPlatformsForMovie(query);
         
-        List<String> scrappedPlatforms = googlePage.getPlatformsForMovie(query);
-
         if(!keepActive){
             driver.close();
             driver.quit();
         }
-
         return scrappedPlatforms;
     }
 }
