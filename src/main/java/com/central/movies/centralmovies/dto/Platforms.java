@@ -22,15 +22,19 @@ public class Platforms {
 
     @Id
     @JsonIgnore
+    @Column(name = "platform_id")
     private Long platformId;
 
-    @Column
+    @Column(name = "name")
     private String name;
 
-    @Column
+    @Column(name = "description")
     private String description;
 
-    @Column
+    @Column(name = "stream_url")
+    private String streamUrl;
+
+    @Column(name = "is_online")
     private boolean isOnline;
     
 }

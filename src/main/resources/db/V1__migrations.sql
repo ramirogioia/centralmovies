@@ -1,11 +1,8 @@
-DROP TABLE IF EXISTS flywar_schema_history;
-DROP TABLE IF EXISTS platforms;
-DROP TABLE IF EXISTS search_cache;
-DROP TABLE IF EXISTS movies_platforms;
-DROP TABLE IF EXISTS movies;
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'tu_esquema' AND table_name = 'flyway_schema_history') THEN
+    DROP TABLE tu_esquema.flyway_schema_history;
+END IF;
 
-
-CREATE TABLE movies (
+CREATE TABLE IF NOT EXISTS movies (
   movie_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   imdb_id VARCHAR(255) NOT NULL,
   name VARCHAR(255) NOT NULL,
@@ -15,14 +12,15 @@ CREATE TABLE movies (
   image VARCHAR(255)
 );
 
-CREATE TABLE platforms (
+CREATE TABLE IF NOT EXISTS platforms (
   platform_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   description VARCHAR(255) NOT NULL,
+  stream_url VARCHAR(255) NOT NULL,
   is_online BOOLEAN NOT NULL
 );
 
-CREATE TABLE movies_platforms (
+CREATE TABLE IF NOT EXISTS movies_platforms (
   movie_id INT NOT NULL,
   platform_id INT NOT NULL,
   registered_date TIMESTAMP NOT NULL,
@@ -31,7 +29,7 @@ CREATE TABLE movies_platforms (
   FOREIGN KEY (platform_id) REFERENCES platforms(platform_id)
 );
 
-CREATE TABLE search_cache (
+CREATE TABLE IF NOT EXISTS search_cache (
   id INT AUTO_INCREMENT PRIMARY KEY,
   query VARCHAR(255),
   movie_id INT NOT NULL,

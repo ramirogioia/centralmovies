@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.central.movies.centralmovies.dto.MovieDTO;
+import com.central.movies.centralmovies.dto.MoviePlatformsDTO;
 import com.central.movies.centralmovies.dto.MoviesListDTO;
 import com.central.movies.centralmovies.dto.MoviesPlatformId;
 import com.central.movies.centralmovies.dto.MoviesPlatforms;
@@ -76,8 +78,8 @@ public class MovieService {
         }
     }
 
-    public ResponseEntity<List<Platforms>> getPlatformsByMovieText(String searchText)
-            throws IOException, InterruptedException, org.openqa.selenium.NoSuchElementException {
+    public ResponseEntity<MoviePlatformsDTO> getPlatformsByMovieText(String searchText)
+            throws IOException, InterruptedException, NoSuchElementException {
         MovieDTO cachedMovie = validateAndGetFromCache(searchText);
 
         if (cachedMovie != null) {
@@ -86,14 +88,17 @@ public class MovieService {
             if (moviePlatformsList.isEmpty()) {
                 Optional<MovieDTO> movie = movieRepository.findById(cachedMovie.getMovieId());
 
-                return getListOfPlatforms(movie.get(), movie.get().getName());
-                
+                return ResponseEntity.ok(MoviePlatformsDTO.builder()
+                        .movieName(movie.get().getName())
+                        .platforms(getListOfPlatforms(movie.get(), movie.get().getName())).build());
+
             } else {
                 List<Platforms> platformsList = moviePlatformsList.stream()
                         .map(MoviesPlatforms::getPlatform)
                         .collect(Collectors.toList());
 
-                return ResponseEntity.ok(platformsList);
+                return ResponseEntity.ok(MoviePlatformsDTO.builder()
+                        .movieName(cachedMovie.getName()).platforms(platformsList).build());
             }
         } else {
             ResponseEntity<MoviesListDTO> response = imdbClient.getImdbMovie(formatSearchText(searchText));
@@ -104,16 +109,20 @@ public class MovieService {
                 if (existingMovie != null) {
                     cacheRepository.save(
                             SearchCacheEntity.builder().query(searchText).movie_id(existingMovie.getMovieId()).build());
-                            Optional<MovieDTO> movie = movieRepository.findById(existingMovie.getMovieId());
+                    Optional<MovieDTO> movie = movieRepository.findById(existingMovie.getMovieId());
 
-                            return getListOfPlatforms(movie.get(), movie.get().getName());
+                    return ResponseEntity.ok(MoviePlatformsDTO.builder()
+                            .movieName(movie.get().getName())
+                            .platforms(getListOfPlatforms(movie.get(), movie.get().getName())).build());
                 } else {
                     movieRepository.save(bestMatch);
                     cacheRepository.save(
                             SearchCacheEntity.builder().query(searchText).movie_id(bestMatch.getMovieId()).build());
-                            Optional<MovieDTO> movie = movieRepository.findById(bestMatch.getMovieId());
+                    Optional<MovieDTO> movie = movieRepository.findById(bestMatch.getMovieId());
 
-                            return getListOfPlatforms(movie.get(), movie.get().getName());
+                    return ResponseEntity.ok(MoviePlatformsDTO.builder()
+                            .movieName(movie.get().getName())
+                            .platforms(getListOfPlatforms(movie.get(), movie.get().getName())).build());
                 }
             } else {
                 return ResponseEntity.status(response.getStatusCode()).body(null);
@@ -164,55 +173,88 @@ public class MovieService {
         return searchText.replace(" ", "%20");
     }
 
-public ResponseEntity<List<Platforms>> getListOfPlatforms(MovieDTO movie, String searchText)
-        throws org.openqa.selenium.NoSuchElementException {
-    driverManager = new WebDriverManagerHead(false);
-    String availablePlatforms = driverManager.getPlatformsInformationFromScrapping(searchText, false);
-    List<Platforms> availablePlatformsFromScrapping;
+    public List<Platforms> getListOfPlatforms(MovieDTO movie, String searchText)
+            throws NoSuchElementException {
+        driverManager = new WebDriverManagerHead(false);
+        String availablePlatforms = driverManager.getPlatformsInformationFromScrapping(searchText, false);
+        List<Platforms> availablePlatformsFromScrapping;
 
-    if (!availablePlatforms.isBlank() && !availablePlatforms.isEmpty()) {
+        if (!availablePlatforms.isBlank() && !availablePlatforms.isEmpty()) {
 
-        List<Platforms> availablePlatformsFromDb = platformsRepository.findAll();
-        if (availablePlatformsFromDb.size() == 0) {
-            throw new NotFoundException("No hay plataformas en la base de datos.");
+            List<Platforms> availablePlatformsFromDb = platformsRepository.findAll();
+            if (availablePlatformsFromDb.size() == 0) {
+                throw new NotFoundException("No hay plataformas en la base de datos.");
+            }
+
+            if (availablePlatforms.split("\\r?\\n").length == 1){
+                availablePlatformsFromScrapping = getAvailablePlatformFromUrl(availablePlatformsFromDb,
+                        availablePlatforms);
+            }else{
+                availablePlatformsFromScrapping = getAvailablePlatformsFromText(availablePlatformsFromDb,
+                        availablePlatforms);
+            }
+
+
+            if (!availablePlatformsFromScrapping.isEmpty()) {
+
+                List<MoviesPlatforms> moviesPlatformsList = availablePlatformsFromScrapping.stream()
+                        .map(platform -> {
+                            MoviesPlatforms moviesPlatforms = MoviesPlatforms.builder()
+                                    .id(new MoviesPlatformId(movie.getMovieId(), platform.getPlatformId()))
+                                    .movie(movie)
+                                    .platform(platform)
+                                    .registeredDate(new Timestamp(System.currentTimeMillis()))
+                                    .build();
+                            return moviesPlatforms;
+                        })
+                        .collect(Collectors.toList());
+
+                moviesPlatformsRepository.saveAll(moviesPlatformsList);
+            }
+
+        } else {
+            throw new NotFoundException("Elemento no encontrado.");
         }
-
-        availablePlatformsFromScrapping = getAvailablePlatformsFromText(availablePlatformsFromDb,
-                availablePlatforms);
-
-        if (!availablePlatformsFromScrapping.isEmpty()) {
-
-            List<MoviesPlatforms> moviesPlatformsList = availablePlatformsFromScrapping.stream()
-            .map(platform -> {
-                MoviesPlatforms moviesPlatforms = MoviesPlatforms.builder()
-                        .id(new MoviesPlatformId(movie.getMovieId(), platform.getPlatformId()))
-                        .movie(movie)
-                        .platform(platform)
-                        .registeredDate(new Timestamp(System.currentTimeMillis()))
-                        .build();
-                return moviesPlatforms;
-            })
-            .collect(Collectors.toList());
-
-            moviesPlatformsRepository.saveAll(moviesPlatformsList);
-        }
-
-    } else {
-        throw new NotFoundException("Elemento no encontrado.");
+        return availablePlatformsFromScrapping;
     }
 
-    return ResponseEntity.ok(availablePlatformsFromScrapping);
-}
-
-
-    private List<Platforms> getAvailablePlatformsFromText(List<Platforms> availablePlatformsFromDb, String availablePlatforms) {
+    private List<Platforms> getAvailablePlatformFromUrl(List<Platforms> availablePlatformsFromDb, String availablePlatforms) {
         List<Platforms> matchingPlatforms = new ArrayList<>();
     
+        List<String> platformUrls = availablePlatformsFromDb.stream()
+                .map(Platforms::getStreamUrl)
+                .collect(Collectors.toList());
+    
+        String[] lines = availablePlatforms.split("\n");
+    
+        for (String line : lines) {
+            if (!line.trim().isEmpty()) {
+                String lineTrimmed = line.trim();
+    
+                if (platformUrls.stream().anyMatch(url -> lineTrimmed.contains(url))) {
+                    Platforms matchingPlatform = availablePlatformsFromDb.stream()
+                            .filter(platform -> lineTrimmed.contains(platform.getStreamUrl()))
+                            .findFirst()
+                            .orElse(null);
+    
+                    if (matchingPlatform != null) {
+                        matchingPlatforms.add(matchingPlatform);
+                    }
+                }
+            }
+        }
+        return matchingPlatforms;
+    }
+
+    private List<Platforms> getAvailablePlatformsFromText(List<Platforms> availablePlatformsFromDb,
+            String availablePlatforms) {
+        List<Platforms> matchingPlatforms = new ArrayList<>();
+
         String[] lines = availablePlatforms.split("\n");
         List<String> platformDescriptions = availablePlatformsFromDb.stream()
                 .map(platform -> platform.getDescription().toUpperCase())
                 .collect(Collectors.toList());
-    
+
         for (String line : lines) {
             if (!line.trim().isEmpty()) {
                 String lineUpperCase = line.trim().toUpperCase();
@@ -221,7 +263,7 @@ public ResponseEntity<List<Platforms>> getListOfPlatforms(MovieDTO movie, String
                             .filter(platform -> platform.getDescription().toUpperCase().contains(lineUpperCase))
                             .findFirst()
                             .orElse(null);
-    
+
                     if (matchingPlatform != null) {
                         matchingPlatforms.add(matchingPlatform);
                     }
