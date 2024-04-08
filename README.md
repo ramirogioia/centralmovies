@@ -1,4 +1,4 @@
-# Automation Testing Task - End to end cases - QA Automation
+# CentralMovies project - UNDAV
 
 ---
 

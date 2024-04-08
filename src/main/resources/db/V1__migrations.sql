@@ -1,6 +1,6 @@
-IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'tu_esquema' AND table_name = 'flyway_schema_history') THEN
-    DROP TABLE tu_esquema.flyway_schema_history;
-END IF;
+/*IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'movies_data' AND table_name = 'flyway_schema_history') THEN
+    DROP TABLE movies_data.flyway_schema_history;
+END IF;*/
 
 CREATE TABLE IF NOT EXISTS movies (
   movie_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
