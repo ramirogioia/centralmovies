@@ -47,7 +47,7 @@ public class WebDriverManagerHead {
             ChromeOptions options = new ChromeOptions();
             System.setProperty("webdriver.chrome.driver",  System.getProperty("user.dir") + "/src/main/resources/chromedriver.exe");
             ChromeDriverService service = new ChromeDriverService.Builder().build();
-            // options.addArguments("--headless");
+            options.addArguments("--headless");
             driver = new ChromeDriver(service, options);
         }
         waiter = new Waiter(driver);
